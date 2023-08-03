@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeLeaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Order history</title>
+  <script src="https://kit.fontawesome.com/097aba0852.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../static/tailwind/index.css" />
+  <link rel="stylesheet" href="../static/tailwind/font.css" />
+</head>
+
+<body class="overflow-x-hidden">
+  <header th:replace="~{./fragments/header.html}"></header>
+  <section class="mx-48 my-10 flex justify-around rounded-xl bg-blue-bootstrap p-2" id="filter-bar">
+    <span class="cursor-pointer font-bold text-white" id="all-order-btn">All Order</span>
+    <span class="cursor-pointer font-bold text-white" id="pending-btn">Pending</span>
+    <span class="cursor-pointer font-bold text-white" id="completed-btn">Completed</span>
+    <span class="cursor-pointer font-bold text-white" id="cancelled-btn">Cancelled</span>
+  </section>
+  <section class="searchbar mx-48 flex items-center space-x-3 rounded-xl bg-slate-300 p-1">
+    <div class="mx-4 w-8">
+      <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+        viewBox="0 0 50 50" xml:space="preserve" fill="#000000">
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+        <g id="SVGRepo_iconCarrier">
+          <path fill="#000000"
+            d="M20.745,32.62c2.883,0,5.606-1.022,7.773-2.881L39.052,40.3c0.195,0.196,0.452,0.294,0.708,0.294 c0.255,0,0.511-0.097,0.706-0.292c0.391-0.39,0.392-1.023,0.002-1.414L29.925,28.319c3.947-4.714,3.717-11.773-0.705-16.205 c-2.264-2.27-5.274-3.52-8.476-3.52s-6.212,1.25-8.476,3.52c-4.671,4.683-4.671,12.304,0,16.987 C14.533,31.37,17.543,32.62,20.745,32.62z M13.685,13.526c1.886-1.891,4.393-2.932,7.06-2.932s5.174,1.041,7.06,2.932 c3.895,3.905,3.895,10.258,0,14.163c-1.886,1.891-4.393,2.932-7.06,2.932s-5.174-1.041-7.06-2.932 C9.791,23.784,9.791,17.431,13.685,13.526z">
+          </path>
+        </g>
+      </svg>
+    </div>
+  </section>
+  <section th:each="transaction : ${transactionList}" class="mx-48 my-10">
+    <div th:if="${transaction.order.status == T(app.vinhomes.entity.type_enum.OrderStatus).PENDING}"
+      class="pending my-10 flex-col">
+      <!-- Render div for pending orders -->
+      <div class="flex rounded-lg border-2 p-4 space-x-6">
+        <div class="w-1/6">
+          <img class="h-full w-full" th:src="@{${transaction.order.service.urlImage}}" alt="tv-cleaning" />
+        </div>
+        <div class="w-2/6">
+          <p th:text="${transaction.order.service.serviceName}"></p>
+          <p th:text="${transaction.order.createTime}" class="createTime"></p>
+          <p>Status:<span class="text-blue-bootstrap" th:text="' ' + ${transaction.order.status}"></span></p>
+        </div>
+        <div class="flex w-3/6 items-start justify-between">
+          <span th:text="'₫' + ${transaction.order.price}" class="price"></span>
+          <div class="space-x-5">
+            <button class="rounded-xl bg-red-cancel px-3 py-1"
+              th:onclick="callCancelService([[${transaction.order.orderId}]])">Cancel</button>
+            <button class="rounded-xl bg-green-success px-3 py-1"
+              th:if="${transaction.status == T(app.vinhomes.entity.type_enum.TransactionStatus).PENDING && transaction.order.payment.paymentName != 'COD'}"
+              th:onclick="payOrder([[${transaction.order.orderId}]])">Pay</button>
+            <a th:href="@{/order-history/{orderId}(orderId=${transaction.order.orderId})}">
+              <button class="rounded-xl bg-yellow-info px-3 py-1">
+                View Details
+              </button>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div th:if="${transaction.order.status == T(app.vinhomes.entity.type_enum.OrderStatus).SUCCESS}"
+      class="completed my-10 flex-col">
+      <!-- Render div for completed orders -->
+      <div class="flex rounded-lg border-2 p-4 space-x-6">
+        <div class="w-1/6">
+          <img class="h-full w-full" th:src="@{${transaction.order.service.urlImage}}" alt="tv-cleaning" />
+        </div>
+        <div class="w-2/6">
+          <p th:text="${transaction.order.service.serviceName}"></p>
+          <p th:text="${transaction.order.createTime}" class="createTime"></p>
+          <p>Status:<span class="text-green-success" th:text="' ' + ${transaction.order.status}"></span></p>
+        </div>
+        <div class="flex w-3/6 items-start justify-between">
+          <span th:text="'₫' + ${transaction.order.price}" class="price"></span>
+          <div class="space-x-5">
+            <a th:href="@{/service/{id}(id=${transaction.order.service.serviceId})}">
+              <button class="rounded-xl bg-yellow-info px-3 py-1">
+                Order Again
+              </button>
+            </a>
+            <a th:href="@{/order-history/{orderId}(orderId=${transaction.order.orderId})}">
+              <button class="rounded-xl bg-yellow-info px-3 py-1">
+                View Details
+              </button>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div th:if="${transaction.order.status == T(app.vinhomes.entity.type_enum.OrderStatus).CANCEL}"
+      class="cancelled my-10 flex-col">
+      <div class="flex rounded-lg border-2 p-4 space-x-6">
+        <div class="w-1/6">
+          <img class="h-full w-full" th:src="@{${transaction.order.service.urlImage}}" alt="tv-cleaning" />
+        </div>
+        <div class="w-2/6">
+          <p th:text="${transaction.order.service.serviceName}"></p>
+          <p th:text="${transaction.order.createTime}" class="createTime"></p>
+          <p>Status:<span class="text-red-cancel" th:text="' ' + ${transaction.order.status}"></span></p>
+        </div>
+        <div class="flex w-3/6 items-start justify-between">
+          <span th:text="'₫' + ${transaction.order.price}" class="price"></span>
+          <div class="space-x-5">
+            <a th:href="@{/service/{id}(id=${transaction.order.service.serviceId})}">
+              <button class="rounded-xl bg-yellow-info px-3 py-1">
+                Order Again
+              </button>
+            </a>
+            <a th:href="@{/order-history/{orderId}(orderId=${transaction.order.orderId})}">
+              <button class="rounded-xl bg-yellow-info px-3 py-1">
+                View Details
+              </button>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <footer th:replace="~{./fragments/footer.html}"></footer>
+  <script>
+    const price = document.querySelectorAll('.price')
+    const createTime = document.querySelectorAll('.createTime')
+    const pendingOrderDisplay = document.getElementsByClassName("pending");
+    const cancelledOrderDisplay = document.getElementsByClassName("cancelled");
+    const completedOrderDisplay = document.getElementsByClassName("completed");
+    const pendingBtn = document.getElementById("pending-btn");
+    const filterBar = document.getElementById("filter-bar");
+    pendingBtn.addEventListener("click", () => {
+      changePendingDisplay();
+    });
+    const cancelledBtn = document.getElementById("cancelled-btn");
+    cancelledBtn.addEventListener("click", () => {
+      changeCancelledDisplay();
+    });
+    const completedBtn = document.getElementById("completed-btn");
+    completedBtn.addEventListener("click", () => {
+      changeCompletedDisplay();
+    });
+    const allOrderBtn = document.getElementById("all-order-btn");
+    allOrderBtn.addEventListener("click", () => {
+      showAllOrder();
+    })
+    let changePendingDisplay = () => {
+      filterBar.classList.remove("bg-red-cancel");
+      filterBar.classList.remove("bg-green-success");
+      filterBar.classList.add("bg-blue-bootstrap");
+      for (let i = 0; i < pendingOrderDisplay.length; i++) {
+        const div = pendingOrderDisplay[i];
+        div.style.display = "flex";
+      }
+      for (let i = 0; i < cancelledOrderDisplay.length; i++) {
+        const div = cancelledOrderDisplay[i];
+        div.style.display = "none";
+      }
+      for (let i = 0; i < completedOrderDisplay.length; i++) {
+        const div = completedOrderDisplay[i];
+        div.style.display = "none";
+      }
+    };
+    price.forEach(p => {
+      let number = parseInt(p.innerHTML.split('₫')[1]);
+      let [integerPart, decimalPart] = number.toFixed(0).toString().split('.');
+      let formattedIntegerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      let formattedNumber = decimalPart ? `${formattedIntegerPart}.${decimalPart}` : formattedIntegerPart;
+      p.innerHTML = `₫${formattedNumber}`
+    })
+    createTime.forEach(time => {
+      time.innerHTML = time.innerHTML.split("T")[0]
+    })
+
+    let changeCancelledDisplay = () => {
+      filterBar.classList.add("bg-red-cancel");
+      filterBar.classList.remove("bg-green-success");
+      filterBar.classList.remove("bg-blue-bootstrap");
+      for (let i = 0; i < pendingOrderDisplay.length; i++) {
+        const div = pendingOrderDisplay[i];
+        div.style.display = "none";
+      }
+      for (let i = 0; i < cancelledOrderDisplay.length; i++) {
+        const div = cancelledOrderDisplay[i];
+        div.style.display = "flex";
+      }
+      for (let i = 0; i < completedOrderDisplay.length; i++) {
+        const div = completedOrderDisplay[i];
+        div.style.display = "none";
+      }
+    };
+    let changeCompletedDisplay = () => {
+      filterBar.classList.remove("bg-red-cancel");
+      filterBar.classList.add("bg-green-success");
+      filterBar.classList.remove("bg-blue-bootstrap");
+      for (let i = 0; i < pendingOrderDisplay.length; i++) {
+        const div = pendingOrderDisplay[i];
+        div.style.display = "none";
+      }
+      for (let i = 0; i < cancelledOrderDisplay.length; i++) {
+        const div = cancelledOrderDisplay[i];
+        div.style.display = "none";
+      }
+      for (let i = 0; i < completedOrderDisplay.length; i++) {
+        const div = completedOrderDisplay[i];
+        div.style.display = "flex";
+      }
+    };
+    let showAllOrder = () => {
+      filterBar.classList.remove("bg-red-cancel");
+      filterBar.classList.remove("bg-green-success");
+      filterBar.classList.add("bg-blue-bootstrap");
+      for (let i = 0; i < pendingOrderDisplay.length; i++) {
+        const div = pendingOrderDisplay[i];
+        div.style.display = "flex";
+      }
+      for (let i = 0; i < cancelledOrderDisplay.length; i++) {
+        const div = cancelledOrderDisplay[i];
+        div.style.display = "flex";
+      }
+      for (let i = 0; i < completedOrderDisplay.length; i++) {
+        const div = completedOrderDisplay[i];
+        div.style.display = "flex";
+      }
+    }
+
+
+
+
+
+
+
+    async function callCancelService(orderId) {
+      //let id = document.getElementById(id)
+      console.log(orderId)
+      var response = await fetch("http://localhost:8080/transaction/cancelOrder/refundTransaction/" + orderId,
+        {
+          method: "GET"
+        });
+      var status = await response.status; console.log(status)
+      var toText = await response.text(); console.log(toText)
+      if (status < 200 || status > 300) {
+        console.log("refund fail");
+        alert("Refunded fail: " + toText.toLowerCase())
+      } else {
+        console.log("refund success");
+        alert("Refunded successfully ")
+        reloadPage()
+      }
+
+    }
+
+
+    async function payOrder(orderId) {
+      var response = await fetch("http://localhost:8080/vnpay/createPayment/continuePaying/" + orderId,
+        {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        });
+      var status = await response.status
+      var toText = await response.text()
+      console.log(response)
+      console.log(status)
+      console.log(toText)
+      if (status < 200 || status > 300) {
+        console.log(" request fail " + toText)
+        alert("request failed: " + toText)
+      } else {
+        console.log(" request Success")
+        alert("request Success, precceed getting back to vnpay ")
+        window.location.replace(toText)
+      }
+
+    }
+
+    function reloadPage() {
+      window.location.href = "/order-history";
+    }
+  </script>
+</body>
+
+</html>

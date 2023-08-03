@@ -1,0 +1,43 @@
+<html lang="en" class="w-full h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/097aba0852.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="../static/tailwind/font.css" />
+    <link rel="stylesheet" href="../static/tailwind/index.css" />
+    <title class="capitalize">Confirm transaction</title>
+</head>
+
+<body class="w-full h-full">
+    <div class="w-inherit h-inherit flex justify-center items-center">
+        <div class="border-2 border-black rounded-lg w-[50%] flex flex-col items-center">
+
+            <div class="w-[65%] h-[60%]">
+                <p class="transactionStatus font-semibold capitalize text-center my-2 text-[30px]">Transaction Status
+                </p>
+                <div class="h-[100px] flex flex-col justify-center items-center">
+                    <p id="message" class="text-center text-[25px]"></p>
+                </div>
+                <div class="flex justify-center items-center my-2">
+                    <button class="text-center bg-blue-300 rounded-lg w-[80%] py-2 hover:bg-blue-400"><a
+                            href="/">Confirm</a></button>
+                </div>
+
+            </div>
+        </div>
+</body>
+<script>
+    const message = document.getElementById("message");
+
+    var message_concat = ""
+    var queryString = window.location.search;
+    var getMessageFromParam = new URLSearchParams(queryString).get('message')
+    console.log(getMessageFromParam);
+    message.innerHTML = getMessageFromParam
+    function getHomePage() {
+        window.location.href = "/"
+    }
+</script>
+
+</html>

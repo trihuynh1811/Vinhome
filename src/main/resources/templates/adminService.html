@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+        crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../static/tailwind/font.css">
+
+    <title>Service Management</title>
+    <style>
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .modal-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            z-index: 1000;
+            width: 55%;
+            display: none;
+        }
+
+        #imagePreview {
+            max-width: 100%;
+            max-height: 200px;
+            margin-bottom: 10px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        .modal-container2 {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            z-index: 1000;
+            display: block;
+        }
+
+        .clickableImgName:hover {
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .home-section {
+            position: relative;
+            background: #f5f5f5;
+            min-height: 100vh;
+            transition: all 0.5s ease;
+        }
+
+        .sidebar.active~.home-section {
+            width: calc(100% - 60px);
+            left: 60px;
+        }
+
+        .home-section nav {
+            display: flex;
+            justify-content: space-between;
+            height: 80px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            position: fixed;
+            width: calc(100% - 340px);
+            left: 340px;
+            z-index: 100;
+            padding: 0 20px;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+            transition: all 0.5s ease;
+        }
+
+        .home-section h1 {
+            position: absolute;
+            margin-top: 20px;
+            text-align: center;
+            margin-bottom: 40px;
+            width: 100%;
+        }
+
+        .service-card {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.5s ease;
+            width: 45%;
+            display: inline-block;
+        }
+
+        #openNav {
+            display: inline-block;
+            border: none;
+            background: none;
+            outline: none;
+            font-size: 40px;
+            cursor: pointer;
+            font-weight: 500;
+            color: rgba(255, 255, 255);
+            transition: all 0.5s ease;
+            text-align: center;
+        }
+
+        .openNav-outline {
+            border: none;
+            outline: none;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            width: 50px;
+            height: 50px;
+            position: fixed;
+            top: 20px;
+            left: 10px;
+        }
+
+        .openNav-outline:hover {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .formBtn:disabled {
+            cursor: default;
+            opacity: 0.5;
+        }
+
+        #dropdownDivider ul li:hover {
+            background-color: #D1D5DB;
+        }
+
+        #dropdownDivider ul li:first-child:hover {
+            border-top-right-radius: 0.3rem;
+            border-top-left-radius: 0.3rem;
+        }
+
+        #dropdownDivider ul li:last-child:hover {
+            border-bottom-right-radius: 0.3rem;
+            border-bottom-left-radius: 0.3rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header th:replace="~{./fragments/adminHeaderBootstrap.html}"></header>
+    <div class="servicePicContainer position-fixed top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center d-none"
+        style="z-index: 99; background-color: rgba(0, 0, 0, 0.5);">
+        <div class="d-flex justify-content-center align-items-center" style="height: 70%; width: 60%;">
+            <img src="" alt="" class="serviceImg w-100 h-100 object-fit-contain">
+        </div>
+        <div class="closeBtn btn btn-danger w-25 py-2 mt-5">Close</div>
+    </div>
+    <!-- CREATE SERVICE FORM-->
+    <!-- CREATE SERVICE FORM-->
+    <!-- CREATE SERVICE FORM-->
+    <!--LOAD CATEGORY -->
+
+    <div class="container mt-3">
+        <div class="d-none d-flex justify-content-center align-items-center position-fixed top-0 start-0 w-100 h-100"
+            style="
+            z-index: 1;
+            background-color: rgb(0 0 0 / 50%);
+        " id="createServiceFormContainer">
+            <div class="modal-container rounded border border-dark serviceForm" style="display: block;">
+                <h3 class="text-center">Create Service</h3>
+                <form id="createServiceForm">
+                    <div class="form-group mb-3">
+                        <label for="serviceName" class="mb-1">Service Name</label>
+                        <input type="text" class="form-control" id="serviceName" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="category" class="mb-1">Category</label>
+                        <select class="form-control" id="category" required>
+                            <option value="something">Select a category</option>
+
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="price" class="mb-1">Price</label>
+                        <input type="number" class="form-control" id="price" min="1" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="des" class="mb-1">Description</label>
+                        <textarea rows="5" type="text" class="form-control" id="des" required></textarea>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="numOfPeople" class="mb-1">Number Of people</label>
+                        <input type="number" min="1" class="form-control" id="numOfPeople" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="mb-1 text-capitalize">Image of the service</label>
+                        <br>
+                        <label for="image" class="browseBtn border rounded py-1 px-2" role="button"
+                            style="background-color: rgba(192, 192, 192, 0.5);">Browse...</label>
+                        <span class="img-file-name ms-3">
+                            Image name: <span class="clickableImgName" style="font-weight: bold;"></span>
+                        </span>
+                        <input type="file" class="uploadFile d-none form-control-file" id="image" value="" required>
+                    </div>
+                    <div class="d-flex justify-content-end align-content-center">
+                        <button type="button" class="btn btn-danger w-50" id="cancelCreateService">Cancel</button>
+                        <button type="submit" class="formBtn btn btn-primary ms-2 w-50"
+                            id="createServiceBtn">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="d-flex p0 justify-content-start create-service-btn" style="padding: 0 3.5%;">
+            <button type="button" class="btn btn-primary " id="showCreateService">Create Service</button>
+        </div>
+
+    </div>
+
+
+    <!--FORM UPDATE-->
+    <!--FORM UPDATE-->
+    <!--FORM UPDATE-->
+    <div class="d-none d-flex justify-content-center align-items-center position-fixed top-0 start-0 w-100 h-100" style="
+                        z-index: 1;
+                        background-color: rgb(0 0 0 / 50%);
+                    " id="UpdateServiceForm">
+        <form class="row g-3 p-3 modal-container2 rounded border border-black serviceForm" id=""
+            style="display: block;">
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="serviceNameUpdate" class="form-label">Service Name</label>
+                    <input type="text" class="form-control" id="serviceNameUpdate" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="categoryUpdate" class="form-label">Category</label>
+                    <select class="form-control" id="categoryUpdate" required>
+                        <option value="" id="defaultValueOfService"></option>
+
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="priceUpdate" class="form-label">Price</label>
+                    <input type="number" class="form-control" id="priceUpdate">
+                </div>
+            </div>
+            <div class="col-12">
+                <label for="des" class="form-label">Description</label>
+                <textarea rows="5" class="form-control" id="description"></textarea>
+            </div>
+            <div class="col-12">
+                <label for="numOfPeopleUpdate" class="form-label">Number of worker</label>
+                <input type="number" class="form-control" id="numOfPeopleUpdate">
+            </div>
+            <div class="col-12">
+                <label class="mb-1 text-capitalize">Image of the service</label>
+                <br>
+                <label for="imageFile" class="browseBtn border rounded py-1 px-2" role="button"
+                    style="background-color: rgba(192, 192, 192, 0.5);">Browse...</label>
+                <span class="img-file-name ms-3">
+                    Image name: <span class="clickableImgName" style="font-weight: bold;"></span>
+                </span>
+                <input type="file" class="uploadFile d-none form-control-file" id="imageFile" value="">
+            </div>
+            <div class="col-12 d-flex justify-content-end align-content-center">
+                <button type="button" class="btn btn-danger w-50" id="cancelUpdateService">Cancel</button>
+                <button type="submit" class="formBtn btn btn-primary ms-2 w-50" id="updateService">Update</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="container service">
+
+    </div>
+
+    <!--CANCEL BUTTON-->
+    <!--CANCEL BUTTON-->
+    <!--CANCEL BUTTON-->
+    <script>
+        const clickableImgName = document.querySelectorAll('.clickableImgName')
+        const createServiceFormContainer = document.querySelector('#createServiceFormContainer')
+        const closeBtn = document.querySelector('.closeBtn')
+
+        const serviceImg = document.querySelector('.serviceImg')
+        const serviceForm = document.querySelectorAll('.serviceForm')
+        const servicePicContainer = document.querySelector('.servicePicContainer')
+
+        const uploadFile = document.querySelectorAll('.uploadFile')
+        const UpdateServiceForm = document.querySelector('#UpdateServiceForm')
+        const updateServiceBtn = document.querySelector('#updateService')
+        const createServiceBtn = document.querySelector('#createServiceBtn')
+
+        var _validFileExtensions = [".jpg", ".jpeg", ".png"];
+
+        let serviceFormIndex = 0;
+
+        document.getElementById("showCreateService").addEventListener("click", function () {
+            document.getElementById("createServiceForm").style.display = '';
+            let output = '';
+            fetch("/api/categories")
+                .then(res => res.json())
+                .then(data => {
+                    console.log(data)
+                    data.forEach(item => {
+                        const categoryName = item['serviceCategoryName'];
+                        const categoryId = item['serviceCategoryId'];
+                        output +=
+                            `
+                            <option value="${categoryId}">${categoryName}</option>
+                        `
+                    })
+                    document.getElementById("category").innerHTML = output;
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+
+        })
+        document.getElementById('createServiceForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent form submission
+            var serviceName = document.getElementById('serviceName').value;
+            var categoryId = document.getElementById('category').value;
+            var price = document.getElementById('price').value;
+            var description = document.getElementById('des').value;
+            var numOfPeople = document.getElementById('numOfPeople').value;
+            var image = document.getElementById('image').files[0];
+            createServiceBtn.disabled = true
+
+            // Get form values
+
+            // Create form data object
+            var formData = new FormData();
+            formData.append('serviceName', serviceName);
+            formData.append('category', categoryId);
+            formData.append('price', price);
+            formData.append('description', description);
+            formData.append('numOfPeople', numOfPeople);
+            formData.append('image', image);
+            // Send POST request using fetch
+            fetch('/api/services/create', {
+                method: 'POST',
+                body: formData
+            })
+                .then(function (response) {
+                    if (response.ok) {
+                        // Handle successful response
+                        alert(`Successfully create ${serviceName} service !`)
+                        console.log('Service created successfully!');
+                        // Reset the form
+                        // document.getElementById('createServiceForm').reset();
+                        createServiceBtn.disabled = false
+                        return response.json().then(data => {
+                            document.querySelector(".service").innerHTML = ''
+                            let output = '';
+                            let serviceCount = 0;
+                            data.forEach(item => {
+                                if (serviceCount % 2 === 0) {
+                                    // Start a new row every two services
+                                    output += '<div class="row justify-content-center">';
+                                }
+
+                                const service = item['service'];
+                                const serviceId = service['serviceId'];
+                                const serviceName = service['serviceName'];
+                                const category = item['category'];
+                                const categoryName = category['serviceCategoryName'];
+                                const categoryId = category['serviceCategoryId'];
+                                const price = formatMoney(service['price']);
+                                const description = service['description'] !== null ? service['description'] : '';
+                                const status = service['status'];
+                                const url = service['urlImage'];
+                                const numOfPeople = service['numOfPeople'];
+                                output += `
+                                <div class="col-sm-6 service-card">
+                                    <div class="card" style="width: 100%; height:100%;">
+                                        <img src="${url}" class="card-img-top" style="height: 300px">
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title">${serviceName}</h5>
+                                            <p class="card-text">${description}</p>
+                                            <div class="d-flex flex-column flex-grow-1 justify-content-end">
+                                            <p>Category: ${categoryName}</p>
+                                            <p>Price: ${price}</p>
+                                            <div class="d-flex">
+                                            <a href="#" class="btn btn-primary me-2" onclick="updateForm('${serviceId}', '${serviceName}', '${categoryName}', '${price}', '${description}', '${url}', '${numOfPeople}', '${categoryId}')">Update</a>
+                                            
+                                            `
+
+                                if (status === 1) {
+                                    output +=
+                                        `<a href="#" class="btn btn-primary" onclick="setStatus(0, '${serviceId}')">Active</a>
+                            </div>`
+                                }
+                                else {
+                                    output +=
+                                        `<a href="#" class="btn btn-primary" onclick="setStatus(1, '${serviceId}')">Inactive</a>
+                            </div>`
+                                }
+                                output +=
+                                    `
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>`;
+
+                                if (serviceCount % 2 !== 0 || serviceCount === Object.keys(data).length - 1) {
+                                    // Close the row at the end of each pair or when it's the last service
+                                    output += '</div>';
+                                }
+
+                                serviceCount++;
+
+                                document.querySelector(".service").innerHTML = output;
+                            });
+                            for (let i = 0; i < uploadFile.length; i++) {
+                                uploadFile[i].value = ''
+                                clickableImgName[i].innerHTML = ''
+
+                            }
+                            document.querySelectorAll('.form-control').forEach(form => form.value = "")
+                            document.getElementById("createServiceFormContainer").classList.add('d-none')
+                            window.location.reload()
+                        })
+                    } else {
+                        createServiceBtn.disabled = false
+                        // Handle error response
+                        console.log(response.text());
+                        throw new Error()
+                    }
+
+                })
+                .catch(function (error) {
+                    // Handle network error
+                    createServiceBtn.disabled = false
+                    console.log('Network error:', error);
+                });
+        });
+
+        document.getElementById("cancelCreateService").addEventListener("click", function () {
+            for (let i = 0; i < uploadFile.length; i++) {
+                uploadFile[i].value = ''
+                clickableImgName[i].innerHTML = ''
+
+            }
+            document.getElementById("createServiceFormContainer").classList.toggle('d-none')
+        })
+        //Show Service
+
+        fetch("/api/services")
+            .then(res => res.json())
+            .then(data => {
+                let output = '';
+                let serviceCount = 0;
+                data.forEach(item => {
+                    if (serviceCount % 2 === 0) {
+                        // Start a new row every two services
+                        output += '<div class="row justify-content-center">';
+                    }
+
+                    const service = item['service'];
+                    const serviceId = service['serviceId'];
+                    const serviceName = service['serviceName'];
+                    const category = item['category'];
+                    const categoryName = category['serviceCategoryName'];
+                    const categoryId = category['serviceCategoryId'];
+                    const price = formatMoney(service['price']);
+                    const description = service['description'] !== null ? service['description'] : '';
+                    const status = service['status'];
+                    const url = service['urlImage'];
+                    const numOfPeople = service['numOfPeople'];
+                    output += `
+                                <div class="col-sm-6 service-card">
+                                    <div class="card" style="width: 100%; height:100%;">
+                                        <img src="${url}" class="card-img-top" style="height: 300px">
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title">${serviceName}</h5>
+                                            <p class="card-text">${description}</p>
+                                            <div class="d-flex flex-column flex-grow-1 justify-content-end">
+                                            <p>Category: ${categoryName}</p>
+                                            <p>Price: ${price}</p>
+                                            <div class="d-flex">
+                                            <a href="#" class="btn btn-primary me-2" onclick="updateForm('${serviceId}', '${serviceName}', '${categoryName}', '${price}', '${description}', '${url}', '${numOfPeople}', '${categoryId}')">Update</a>
+                                            
+                                            `
+
+                    if (status === 1) {
+                        output +=
+                            `<a href="#" class="btn btn-primary" onclick="setStatus(0, '${serviceId}')">Active</a>
+                            </div>`
+                    }
+                    else {
+                        output +=
+                            `<a href="#" class="btn btn-primary" onclick="setStatus(1, '${serviceId}')">Inactive</a>
+                            </div>`
+                    }
+                    output +=
+                        `
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>`;
+
+                    if (serviceCount % 2 !== 0 || serviceCount === Object.keys(data).length - 1) {
+                        // Close the row at the end of each pair or when it's the last service
+                        output += '</div>';
+                    }
+
+                    serviceCount++;
+
+                    document.querySelector(".service").innerHTML = output;
+                });
+            })
+        function setStatus(status, serviceId) {
+            console.log(status)
+            fetch('api/services/' + serviceId + '/updateStatus', {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ status: status })
+            })
+                .then(res => {
+                    if (res.status === 200) {
+                        window.location.reload();
+                    }
+                    else {
+
+                    }
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+
+        }
+        // GET DATA FOR POSTING
+        var serviceNameUpdate = '';
+        var priceUpdate = '';
+        var des = '';
+        var categoryIdUpdate = '';
+        var urlUpdate = '';
+        var numOfPeopleUpdate = '';
+        document.getElementById("serviceNameUpdate").addEventListener("input", function () {
+            serviceNameUpdate = this.value;
+        })
+        document.getElementById("priceUpdate").addEventListener("input", function () {
+            priceUpdate = this.value;
+        })
+        document.getElementById("description").addEventListener("input", function () {
+            des = this.value;
+        })
+        document.getElementById("categoryUpdate").addEventListener("change", function () {
+            categoryIdUpdate = this.value;
+        })
+        document.getElementById("imageFile").addEventListener("change", function () {
+            urlUpdate = this.files[0];
+        })
+        document.getElementById("numOfPeopleUpdate").addEventListener("input", function () {
+            numOfPeopleUpdate = this.value;
+
+        })
+
+        document.getElementById("cancelUpdateService").addEventListener("click", function () {
+            document.getElementById("UpdateServiceForm").classList.toggle('d-none')
+            console.log("update form cancel btn clicked")
+            serviceId = '';
+            serviceNameUpdate = '';
+            priceUpdate = '';
+            des = '';
+            categoryIdUpdate = '';
+            urlUpdate = '';
+            numOfPeopleUpdate = '';
+        })
+
+        // OPEN UPDATE FORM
+        function updateForm(serviceId, serviceName, categoryName, price, description, url, numOfPeople, categoryId) {
+            this.serviceId = serviceId
+            console.log("show update service form")
+            for (let i = 0; i < uploadFile.length; i++) {
+                uploadFile[i].value = ''
+                clickableImgName[i].innerHTML = ''
+
+            }
+            document.getElementById("createServiceForm").style.display = "none";
+            document.querySelectorAll('.form-control').forEach(form => form.value = "")
+            document.getElementById("createServiceFormContainer").style.display = "none";
+            document.getElementById("UpdateServiceForm").classList.toggle('d-none')
+            document.getElementById("serviceNameUpdate").value = serviceName;
+            document.getElementById("priceUpdate").value = price;
+            console.log(price)
+            document.getElementById("description").value = description;
+            document.getElementById("numOfPeopleUpdate").value = numOfPeople;
+            let output = '';
+            fetch("/api/categories")
+                .then(res => res.json())
+                .then(data => {
+                    console.log(data)
+                    data.forEach(item => {
+                        const categoryNameFromList = item['serviceCategoryName'];
+                        const categoryId = item['serviceCategoryId'];
+                        if (categoryNameFromList === categoryName) {
+                            output += `<option value="${categoryId}" selected>${categoryName}</option>`;
+                        } else {
+                            output += `<option value="${categoryId}">${categoryNameFromList}</option>`;
+                        }
+                    })
+                    document.getElementById("categoryUpdate").innerHTML = output;
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+            var formData = new FormData();
+
+            const form = document.getElementById("UpdateServiceForm");
+            form.addEventListener("submit", function (e) {
+                updateServiceBtn.disabled = true
+                e.preventDefault();
+                formData.append('description', des);
+                formData.append('serviceName', serviceNameUpdate);
+                formData.append('category', categoryIdUpdate);
+                formData.append('price', priceUpdate);
+                formData.append('numOfPeople', numOfPeopleUpdate);
+                formData.append('image', urlUpdate);
+                fetch("/api/services/" + serviceId + "/update", {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(res => {
+                        if (res.status === 200) {
+                            alert(`Successfully update service !`)
+                            updateServiceBtn.disabled = false
+                            window.location.reload();
+                        }
+                        else {
+                            updateServiceBtn.disabled = false
+                            window.location.reload();
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    })
+            })
+            // function update(serviceId) {
+            //     console.log(serviceId);
+            //     console.log(data);
+            //
+            // }
+        }
+
+        function formatMoney(money) {
+            let number = parseInt(money);
+            let [integerPart, decimalPart] = number.toFixed(0).toString().split('.');
+            let formattedIntegerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            let formattedNumber = decimalPart ? `${formattedIntegerPart}.${decimalPart}` : formattedIntegerPart;
+
+            return `₫${formattedNumber}`
+        }
+
+
+
+        // GIVE DATA TO BACKEND
+
+        // CLOSE UPDATE
+
+
+        //OPEN FORM CREATE
+        document.getElementById("showCreateService").addEventListener("click", function () {
+            console.log("open create service form")
+            for (let i = 0; i < uploadFile.length; i++) {
+                uploadFile[i].value = ''
+                clickableImgName[i].innerHTML = ''
+
+            }
+            document.querySelectorAll('.form-control').forEach(form => form.value = "")
+            document.getElementById("createServiceFormContainer").classList.toggle('d-none')
+        })
+
+
+        for (let i = 0; i < clickableImgName.length; i++) {
+            clickableImgName[i].addEventListener('click', () => {
+                serviceFormIndex = i
+                servicePicContainer.classList.toggle('d-none')
+                serviceForm[i].classList.toggle('d-none')
+            })
+
+        }
+
+        closeBtn.addEventListener('click', () => {
+            servicePicContainer.classList.toggle('d-none')
+            serviceForm[serviceFormIndex].classList.toggle('d-none')
+        })
+        for (let i = 0; i < uploadFile.length; i++) {
+            uploadFile[i].onchange = function ValidateSingleInput() {
+                var sFileName = uploadFile[i].value;
+                console.log("sFileName:" + sFileName);
+                if (sFileName.length > 0) {
+                    console.log("sFileName.length:" + sFileName.length);
+                    var blnValid = false;
+                    for (var j = 0; j < _validFileExtensions.length; j++) {
+                        var sCurExtension = _validFileExtensions[j];
+                        console.log("sCurExtension: " + sCurExtension);
+                        if (sFileName.substr(sFileName.length - sCurExtension.length, sCurExtension.length).toLowerCase() === sCurExtension.toLowerCase()) {
+                            blnValid = true;
+                            break;
+                        }
+                    }
+
+                    if (!blnValid) {
+                        clickableImgName[i].innerHTML = ''
+                        alert("Sorry, " + sFileName.split(/(\\|\/)/g).pop() + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "));
+                        uploadFile.value = "";
+                        return false;
+                    }
+                }
+                var tgt = window.event.srcElement
+                var file = tgt.files[0];
+                if (file) {
+                    console.log(file.name)
+                    clickableImgName[i].innerHTML = file.name
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.addEventListener("loadend", () => {
+                        serviceImg.src = reader.result;
+                    });
+                }
+                return true;
+            }
+        }
+
+            //Check type of file
+    </script>
+    <!--UPDATE SERVICE-->
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+</body>
+<script>
+    const dropDownMenuBtn = document.querySelector('#dropdownDividerButton')
+    const dropDownMenu = document.querySelector('#dropdownDivider')
+    const eventSource = new EventSource('/sse');
+
+    dropDownMenuBtn.addEventListener('click', () => {
+        console.log("clicked")
+        dropDownMenu.classList.toggle("d-none")
+    })
+
+    eventSource.addEventListener('leaveReportCount', function (event) {
+        const unreadCount = event.data;
+        const notificationCountElement = document.getElementById('notificationCount');
+        const notificationDotElement = document.getElementById('notificationDot');
+        // Update the unread count in the UI
+        notificationCountElement.innerText = unreadCount;
+
+        localStorage.setItem('unreadCount', unreadCount);
+
+        // Display/hide the red dot based on unread count
+        if (unreadCount > 0) {
+            notificationDotElement.classList.remove('d-none')
+        } else {
+            notificationDotElement.classList.add('d-none')
+        }
+    });
+
+    // Close the SSE connection when leaving the page
+    window.addEventListener('unload', function () {
+        eventSource.close();
+    });
+
+
+</script>
+<script>
+    document.getElementById("see-leave-report").addEventListener("click", function () {
+        localStorage.removeItem('unreadCount');
+        fetch("/sse/close", {
+            method: 'POST'
+        })
+            .then(res => {
+                if (res.status === 200) {
+                }
+            })
+    })
+
+
+</script>
+
+</html>

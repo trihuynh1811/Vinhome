@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeLeaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Homepage</title>
+    <script src="https://kit.fontawesome.com/097aba0852.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="../static/tailwind/font.css">
+    <link rel="stylesheet" href="../static/tailwind/index.css">
+
+</head>
+
+<body class="overflow-x-hidden">
+    <header th:replace="~{./fragments/header.html}"></header>
+    <div class="content-body mx-28 my-20 space-y-28">
+        <!-- About us section -->
+        <section class="flex space-x-8" id="about">
+            <div class="w-2/6">
+                <img src="../static/assets/images/about.jpg" alt="people are cleaning" />
+            </div>
+            <div class="h-full w-4/6 space-y-14 p-2">
+                <p class="text-4xl text-blue-bootstrap">We guarantee <span class="font-bold">excellence</span></p>
+                <p class="text-xl text-strong-gray">
+                    At SuperClean, we believe in the power of a clean environment. Our experienced and professional
+                    cleaners use the
+                    best cleaning products and equipment to provide top-quality cleaning services. We offer regular,
+                    deep, move-in/out
+                    cleaning, and exceptional customer service to meet the unique needs of each client. Contact us
+                    today!
+                </p>
+            </div>
+        </section>
+
+        <!-- Service category section -->
+        <section class="flex-col items-center justify-center space-y-6" id="service">
+            <p class="text-center text-2xl text-strong-gray">Our services</p>
+
+            <p class="text-center text-4xl text-blue-bootstrap">Practice with <span class="font-bold">Love</span></p>
+            <br />
+
+            <!-- 2 service category -->
+            <div class="flex justify-around">
+                <div class="w-2/6 flex-col flex space-y-6 text-center" th:each="c : ${category}">
+                    <img class="mx-auto  rounded-lg" th:src="@{${c.urlImage}}" alt="cleaning house"
+                        style="width: 324px; height: 216px; object-fit: cover;" />
+
+                    <p class="text-2xl text-blue-bootstrap"
+                        th:text="${category != null} ? ${c.serviceCategoryName} : ''"></p>
+
+                    <div>
+                        <p th:text="${category != null} ? ${c.description} : ''" class="text-justify">
+
+                        </p>
+                    </div>
+                    <br />
+                    <div class="flex justify-center items-end flex-1">
+                        <a th:href="@{/category-services/{id}(id=${c.serviceCategoryId})}"><button
+                                class="cursor-pointer rounded-xl border-none bg-yellow-info px-8 py-2">
+                                <span class="font-bold">LEARN MORE</span>
+                            </button></a>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+    <footer th:replace="~{./fragments/footer.html}"></footer>
+</body>
+
+</html>

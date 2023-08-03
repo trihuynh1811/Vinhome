@@ -1,0 +1,38 @@
+<div class="container hidden orderTransactionForm fixed top-0 start-0 w-100 h-100 flex flex-col justify-center items-center form z-99"
+    style="background-color: rgba(0, 0, 0, 0.5);">
+    <div class="bg-white  w-[30%]">
+        <form id="transaction-form" class="py-2 px-3">
+            <h1 id="WARNING_COD" style="color:red; position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                display: none;">FAIL</h1>
+            <div id="TRANSACTIONBODY" style="">
+                <input name="txtID" id="transactionId" type="hidden" value="">
+                <label class="capitalize">Amount</label>
+                <input type="text" id="vnp_Amount"
+                    class="transactionFormInput bg-slate-200 rounded-lg w-[100%] py-1 px-2 mb-2" placeholder=""
+                    name="txtFirstname" value="" readonly>
+
+                <label class="capitalize">Transaction Status</label>
+                <input type="text" id="vnp_TransactionStatus"
+                    class="transactionFormInput bg-slate-200 rounded-lg w-[100%] py-1 px-2 mb-2" placeholder=""
+                    name="txtFirstname" value="" readonly>
+
+                <label class="capitalize">Fee Amount</label>
+                <input type="text" id="vnp_FeeAmount"
+                    class="transactionFormInput bg-slate-200 rounded-lg w-[100%] py-1 px-2 mb-2" placeholder=""
+                    name="txtFirstname" value="" readonly>
+            </div>
+            <div class="flex justify-center items-center mt-3">
+                <button type="button" id="btnGetAdminPage"
+                    class="closeOrderTransactionForm border-2 border-red-300 bg-red-300 py-2 px-3 rounded-lg w-full mr-2 hover:bg-transparent"
+                    onclick="">Close</button>
+                <button type="button" id="btnGetRefundCustomer"
+                    class="border-2 border-blue-300 bg-blue-300 py-2 px-3 rounded-lg w-full hover:bg-transparent disabled:bg-blue-50 disabled:cursor-default"
+                    onclick="getRefundTransaction(this)">Refund</button>
+            </div>
+        </form>
+
+    </div>
+</div>

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeLeaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+
+  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+    crossorigin="anonymous"></script>
+
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="../static/tailwind/font.css">
+  <script src="https://kit.fontawesome.com/097aba0852.js" crossorigin="anonymous"></script>
+
+  <title>Category Management</title>
+  <style>
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+    }
+
+    .modal-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      padding: 20px;
+      z-index: 1000;
+      width: 55%;
+      display: none;
+    }
+
+    #imagePreview {
+      max-width: 100%;
+      max-height: 200px;
+      margin-bottom: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    .modal-container2 {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      padding: 20px;
+      z-index: 1000;
+      display: block;
+    }
+
+    .clickableImgName:hover {
+      color: blue;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .home-section {
+      position: relative;
+      background: #f5f5f5;
+      min-height: 100vh;
+      < !-- width: calc(100% - 340px);
+      -->left: 340px;
+      transition: all 0.5s ease;
+    }
+
+    .sidebar.active~.home-section {
+      width: calc(100% - 60px);
+      left: 60px;
+    }
+
+    .home-section nav {
+      display: flex;
+      justify-content: space-between;
+      height: 80px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      position: fixed;
+      width: calc(100% - 340px);
+      left: 340px;
+      z-index: 100;
+      padding: 0 20px;
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+      transition: all 0.5s ease;
+    }
+
+    .home-section h1 {
+      position: absolute;
+      margin-top: 20px;
+      text-align: center;
+      margin-bottom: 40px;
+      width: 100%;
+    }
+
+    .service-card {
+      margin: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      transition: all 0.5s ease;
+      width: 40%;
+      display: inline-block;
+    }
+
+    #openNav {
+      display: inline-block;
+      border: none;
+      background: none;
+      outline: none;
+      font-size: 40px;
+      cursor: pointer;
+      font-weight: 500;
+      color: rgba(255, 255, 255);
+      transition: all 0.5s ease;
+      text-align: center;
+    }
+
+    .openNav-outline {
+      border: none;
+      outline: none;
+      background-color: rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+      width: 50px;
+      height: 50px;
+      position: fixed;
+      top: 20px;
+      left: 10px;
+    }
+
+    .openNav-outline:hover {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .formBtn:disabled {
+      cursor: default;
+      opacity: 0.5;
+    }
+
+    .hihi {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      padding: 20px;
+      z-index: 1000;
+      display: none;
+      border: black;
+    }
+
+    #dropdownDivider ul li:hover {
+      background-color: #D1D5DB;
+    }
+
+    #dropdownDivider ul li:first-child:hover {
+      border-top-right-radius: 0.3rem;
+      border-top-left-radius: 0.3rem;
+    }
+
+    #dropdownDivider ul li:last-child:hover {
+      border-bottom-right-radius: 0.3rem;
+      border-bottom-left-radius: 0.3rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header th:replace="~{./fragments/adminHeaderBootstrap.html}"></header>
+
+
+  <div class="container">
+    <div class="my-3" style="padding: 0 110px;">
+      <button type="button" class="btn btn-primary" id="showCreateCategory">Create Category</button>
+    </div>
+  </div>
+  <div class="container" id="body">
+  </div>
+  <script>
+    fetch("/api/categories")
+      .then(res => res.json())
+      .then(data => {
+        let output = '';
+        let serviceCount = 0;
+        data.forEach(item => {
+          if (serviceCount % 2 === 0) {
+            // Start a new row every two services
+            output += '<div class="row justify-content-center">';
+          }
+
+          const categoryId = item['serviceCategoryId'];
+          const categoryName = item['serviceCategoryName'];
+          const categoryDescription = item['description'];
+          const url = item['urlImage'];
+          output += `
+              <div class="col-sm-6 service-card">
+                <div class="card" style="width: 100%;">
+                    <img src="${url}" class="card-img-top" style="height: 300px">
+                    <div class="card-body">
+                        <h5 class="card-title">Category Name: ${categoryName}</h5>
+                        <a class="btn btn-primary" onclick="update('${categoryId}', '${categoryName}', '${categoryDescription}')">Update</a>
+                                            `
+          output +=
+            `
+                                        </div>
+                                    </div>
+                                </div>`;
+
+          if (serviceCount % 2 !== 0 || serviceCount === Object.keys(data).length - 1) {
+            // Close the row at the end of each pair or when it's the last service
+            output += '</div>';
+          }
+
+          serviceCount++;
+
+        })
+        document.getElementById("body").innerHTML = output;
+      })
+  </script>
+  <!--FORM CREATE CATEGORY-->
+  <!--FORM CREATE CATEGORY-->
+  <!--FORM CREATE CATEGORY-->
+
+  <div
+    class="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center d-none"
+    id="createCategoryFormContainer" style="z-index: 99; background-color: rgba(0, 0, 0, 0.5);">
+    <div class="w-50 border border-black rounded p-2 bg-white">
+      <h3 class="text-center">Create Category</h3>
+      <form id="createCategoryForm" style="border-color: black">
+        <div class="form-group">
+          <label for="categoryName" class="">Category Name:</label>
+          <input type="text" class="form-control mb-2" id="categoryName" required>
+          <label for="categoryDescription" class="">Description:</label>
+          <textarea rows="5" name="" class="form-control mb-2" id="categoryDescription" required></textarea>
+          <input type="file" class="form-control" id="imageCategoryCreate" required>
+        </div>
+        <div class="d-flex justify-content-cente align-items-center" style="margin-top: 15px">
+          <button type="button" class="btn btn-danger w-50" id="cancelCreateService">Cancel</button>
+          <button type="submit" class="btn btn-primary ms-2 w-50 createCategoryBtn">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!--FORM Update CATEGORY-->
+  <!--FORM Update CATEGORY-->
+  <!--FORM Update CATEGORY-->
+
+  <div
+    class="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center d-none"
+    id="updateCategoryFormContainer" style="z-index: 99; background-color: rgba(0, 0, 0, 0.5);">
+    <div class="w-50 border border-black rounded p-2 bg-white">
+      <h3 class="text-center">Update Category</h3>
+      <form id="updateCategoryForm" style="border-color: black">
+        <div class="form-group">
+          <label for="categoryNameUpdate" class="">Category Name:</label>
+          <input type="text" class="form-control mb-2" id="categoryNameUpdate">
+          <label for="categoryDescriptionUpdate" class="">Description:</label>
+          <textarea rows="5" name="" class="form-control mb-2" id="categoryDescriptionUpdate" required></textarea>
+          <input type="file" class="form-control" id="imageCategoryUpdate">
+        </div>
+        <div class="d-flex justify-content-cente align-items-center" style="margin-top: 15px">
+          <button type="button" class="btn btn-danger w-50" id="cancelUpdateCategory">Cancel</button>
+          <button type="submit" class="btn btn-primary ms-2 w-50 updateCategoryBtn">Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const createCategoryBtn = document.querySelector('.createCategoryBtn')
+    const updateCategoryBtn = document.querySelector('.updateCategoryBtn')
+
+    var categoryNameUpdate = '';
+    var categoryDescriptionUpdate = ''
+    var file = '';
+    var categoryID = '';
+    function update(categoryId, categoryName, categoryDescription) {
+      categoryID = categoryId;
+      document.getElementById("updateCategoryFormContainer").classList.toggle('d-none')
+      document.getElementById("categoryNameUpdate").value = categoryName;
+      document.getElementById("categoryDescriptionUpdate").value = categoryDescription;
+
+      document.getElementById("categoryNameUpdate").addEventListener("input", function () {
+        categoryNameUpdate = this.value;
+      })
+      document.getElementById("categoryDescriptionUpdate").addEventListener("input", function () {
+        categoryDescriptionUpdate = this.value;
+      })
+      document.getElementById("imageCategoryUpdate").addEventListener("change", function () {
+        file = this.files[0];
+      })
+      document.getElementById("updateCategoryFormContainer").addEventListener("submit", function (e) {
+        e.preventDefault();
+        updateCategoryBtn.disabled = true
+        categoryNameUpdate = document.getElementById("categoryNameUpdate").value
+        categoryDescriptionUpdate = document.getElementById("categoryDescriptionUpdate").value
+        var formData = new FormData();
+        formData.append("categoryName", categoryNameUpdate);
+        formData.append("categoryDescription", categoryDescriptionUpdate);
+        formData.append("file", file);
+        fetch("/api/update-category/" + categoryID, {
+          method: 'POST',
+          body: formData
+        })
+          .then(res => {
+            if (res.status === 201) {
+              alert(`Successfully update ${categoryName} category !`)
+              updateCategoryBtn.disabled = false
+              window.location.reload();
+            }
+            else {
+              alert(`Fail to update ${categoryName} category !`)
+              updateCategoryBtn.disabled = false
+            }
+          })
+          .catch(err => {
+            updateCategoryBtn.disabled = false
+            console.log(err);
+          })
+      })
+
+    }
+    document.getElementById("cancelUpdateCategory").addEventListener("click", function () {
+      document.getElementById("updateCategoryFormContainer").classList.toggle('d-none')
+      categoryNameUpdate = '';
+      categoryDescriptionUpdate = ''
+      categoryID = '';
+      file = '';
+    })
+  </script>
+
+
+  <script>
+    document.getElementById("showCreateCategory").addEventListener("click", function () {
+      document.getElementById("createCategoryFormContainer").classList.toggle('d-none')
+    })
+  </script>
+  <script>
+    var categoryNameStr = '';
+    var categoryDescriptionStr = ''
+    var fileImage = '';
+    document.getElementById("createCategoryForm").addEventListener("submit", function (evt) {
+      evt.preventDefault();
+      createCategoryBtn.disabled = true
+      categoryNameStr = document.getElementById('categoryName').value;
+      categoryDescriptionStr = document.querySelector('#categoryDescription').value
+      fileImage = document.getElementById('imageCategoryCreate').files[0];
+      var formData = new FormData();
+      formData.append("categoryName", categoryNameStr);
+      formData.append("categoryDescription", categoryDescriptionStr);
+      formData.append("file", fileImage);
+      fetch("api/create-service-category", {
+        method: 'POST',
+        body: formData
+      })
+        .then(res => {
+          if (res.status === 201) {
+            createCategoryBtn.disabled = false
+            alert(`Successfully create category !`)
+            window.location.reload();
+          }
+          else {
+            createCategoryBtn.disabled = false
+            alert("Not Successfully");
+          }
+        })
+        .catch(err => {
+          createCategoryBtn.disabled = false
+          alert(err);
+        })
+    })
+
+    document.getElementById("cancelCreateService").addEventListener("click", function () {
+      document.getElementById("createCategoryFormContainer").classList.toggle('d-none')
+      document.querySelector('#categoryName').value = ""
+      document.querySelector('#categoryDescription').value = ""
+      categoryDescriptionStr = ''
+      categoryNameStr = '';
+      fileImage = '';
+    })
+  </script>
+  <script>
+    const dropDownMenuBtn = document.querySelector('#dropdownDividerButton')
+    const dropDownMenu = document.querySelector('#dropdownDivider')
+    const eventSource = new EventSource('/sse');
+
+    dropDownMenuBtn.addEventListener('click', () => {
+      console.log("clicked")
+      dropDownMenu.classList.toggle("d-none")
+    })
+
+    eventSource.addEventListener('leaveReportCount', function (event) {
+      const unreadCount = event.data;
+      const notificationCountElement = document.getElementById('notificationCount');
+      const notificationDotElement = document.getElementById('notificationDot');
+      // Update the unread count in the UI
+      notificationCountElement.innerText = unreadCount;
+
+      localStorage.setItem('unreadCount', unreadCount);
+
+      // Display/hide the red dot based on unread count
+      if (unreadCount > 0) {
+        notificationDotElement.classList.remove('d-none')
+      } else {
+        notificationDotElement.classList.add('d-none')
+      }
+    });
+
+    // Close the SSE connection when leaving the page
+    window.addEventListener('unload', function () {
+      eventSource.close();
+    });
+
+
+  </script>
+  <script>
+    document.getElementById("see-leave-report").addEventListener("click", function () {
+      localStorage.removeItem('unreadCount');
+      fetch("/sse/close", {
+        method: 'POST'
+      })
+        .then(res => {
+          if (res.status === 200) {
+          }
+        })
+    })
+
+
+  </script>
+</body>
+
+</html>
